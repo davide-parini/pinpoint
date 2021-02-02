@@ -28,5 +28,4 @@ import java.util.List;
 public interface SystemMetricDao {
     List<SystemMetric> getSystemMetric(QueryParameter queryParameter);
     <T extends Number> List<SampledSystemMetric<T>> getSampledSystemMetric(QueryParameter queryParameter);
-    <T extends Number> List<SampledSystemMetric<T>> getSampledSystemMetricWithInterval(QueryParameter queryParameter);
 }

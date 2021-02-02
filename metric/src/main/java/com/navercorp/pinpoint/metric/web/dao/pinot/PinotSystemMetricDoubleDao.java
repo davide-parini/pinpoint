@@ -51,9 +51,4 @@ public class PinotSystemMetricDoubleDao implements SystemMetricDao {
     public List<SampledSystemMetric<Double>> getSampledSystemMetric(QueryParameter queryParameter) {
         return sqlPinotSessionTemplate.selectList(NAMESPACE+ "selectSampledSystemMetric", queryParameter);
     }
-
-    @Override
-    public List<SampledSystemMetric<Double>> getSampledSystemMetricWithInterval(QueryParameter queryParameter) {
-        return sqlPinotSessionTemplate.selectList(NAMESPACE+ "selectSampledSystemMetricWithInterval", queryParameter);
-    }
 }

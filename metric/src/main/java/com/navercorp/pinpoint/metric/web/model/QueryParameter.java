@@ -21,6 +21,8 @@ import com.navercorp.pinpoint.metric.common.model.Tag;
 import com.navercorp.pinpoint.metric.web.util.Range;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Hyunjoon Cho
@@ -28,80 +30,107 @@ import java.util.List;
 public class QueryParameter {
     private static final int TAG_SET_COUNT = 10;
 
-    private String applicationName;
-    private String hostName;
-    private String metricName;
-    private String fieldName;
-    private List<Tag> tagList;
-    private long interval = 10000L;
-    private Range range;
-    private long limit;
+    private final String applicationName;
+    private final String hostName;
+    private final String metricName;
+    private final String fieldName;
+    private final List<Tag> tagList;
+    private final Range range;
+    private final TimePrecision timePrecision;
+    private final long limit;
 
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
+    public QueryParameter(Builder builder) {
+        this.applicationName = builder.applicationName;
+        this.hostName = builder.hostName;
+        this.metricName = builder.metricName;
+        this.fieldName = builder.fieldName;
+        this.tagList = builder.tagList;
+        this.range = builder.range;
+        this.timePrecision = builder.timePrecision;
+        this.limit = builder.limit;
     }
 
     public String getApplicationName() {
         return applicationName;
     }
 
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
-    }
-
     public String getHostName() {
         return hostName;
-    }
-
-    public void setMetricName(String metricName) {
-        this.metricName = metricName;
     }
 
     public String getMetricName() {
         return metricName;
     }
 
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
-
     public String getFieldName() {
         return fieldName;
-    }
-
-    public void setTagList(List<Tag> tagList) {
-        this.tagList = tagList;
     }
 
     public List<Tag> getTagList() {
         return tagList;
     }
 
-    public void setInterval(long interval) {
-        this.interval = interval;
-    }
-
-    public long getInterval() {
-        return interval;
-    }
-
-    public void setRange(Range range) {
-        this.range = range;
-    }
-
     public Range getRange() {
         return range;
     }
 
-    public void setLimit(long limit) {
-        this.limit = limit;
+    public TimePrecision getTimePrecision() {
+        return timePrecision;
     }
 
     public long getLimit() {
         return limit;
     }
 
-    public void estimateLimit() {
-        this.limit = (range.getRange() / interval + 1) * TAG_SET_COUNT;
+    public static class Builder {
+        private String applicationName;
+        private String hostName;
+        private String metricName;
+        private String fieldName;
+        private List<Tag> tagList;
+        private Range range;
+        private TimePrecision timePrecision;
+        private long limit;
+
+        public void setApplicationName(String applicationName) {
+            this.applicationName = Objects.requireNonNull(applicationName, "applicationName");
+        }
+
+        public void setHostName(String hostName) {
+            this.hostName = Objects.requireNonNull(hostName, "hostName");
+        }
+
+        public void setMetricName(String metricName) {
+            this.metricName = Objects.requireNonNull(metricName, "metricName");
+        }
+
+        public void setFieldName(String fieldName) {
+            this.fieldName = Objects.requireNonNull(fieldName, "fieldName");
+        }
+
+        public void setTagList(List<Tag> tagList) {
+            this.tagList = tagList;
+        }
+
+        public void setRange(Range range) {
+            this.range = range;
+        }
+
+        public void setTimePrecision(TimePrecision timePrecision) {
+            this.timePrecision = timePrecision;
+        }
+
+        public long estimateLimit() {
+            return (range.getRange() / timePrecision.getIntervalInMs() + 1) * TAG_SET_COUNT;
+        }
+
+        public QueryParameter build() {
+            if (timePrecision == null) {
+                this.timePrecision = TimePrecision.newTimePrecision(TimeUnit.MILLISECONDS, 10000);
+            }
+            this.limit = estimateLimit();
+
+            return new QueryParameter(this);
+        }
     }
 }
