@@ -17,16 +17,14 @@
 package com.navercorp.pinpoint.metric.web.controller;
 
 import com.navercorp.pinpoint.metric.common.model.SystemMetric;
-import com.navercorp.pinpoint.metric.common.model.Tag;
-import com.navercorp.pinpoint.metric.web.model.QueryParameter;
-import com.navercorp.pinpoint.metric.web.model.TimePrecision;
+import com.navercorp.pinpoint.metric.web.util.QueryParameter;
+import com.navercorp.pinpoint.metric.web.util.TimePrecision;
 import com.navercorp.pinpoint.metric.web.service.SystemMetricService;
 import com.navercorp.pinpoint.metric.web.util.Range;
 import com.navercorp.pinpoint.metric.web.util.TagParser;
 import com.navercorp.pinpoint.metric.web.util.TimeWindow;
 import com.navercorp.pinpoint.metric.web.util.TimeWindowSampler;
 import com.navercorp.pinpoint.metric.web.model.chart.SystemMetricChart;
-import com.navercorp.pinpoint.metric.web.util.TimeWindowSlotCentricSampler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,14 +57,13 @@ public class SystemMetricController {
             @RequestParam(value = "tags", required = false) List<String> tags,
             @RequestParam("from") long from,
             @RequestParam("to") long to) {
-        List<Tag> tagList = tagParser.parseTags(tags);
 
         QueryParameter.Builder builder = new QueryParameter.Builder();
         builder.setApplicationName(applicationName);
         builder.setHostName(hostName);
         builder.setMetricName(metricName);
         builder.setFieldName(fieldName);
-        builder.setTagList(tagList);
+        builder.setTagList(tagParser.parseTags(tags));
         builder.setRange(Range.newRange(from, to));
         QueryParameter queryParameter = builder.build();
 
@@ -83,16 +80,13 @@ public class SystemMetricController {
             @RequestParam(value = "tags", required = false) List<String> tags,
             @RequestParam("from") long from,
             @RequestParam("to") long to) {
-        List<Tag> tagList = tagParser.parseTags(tags);
-        Range range = Range.newRange(from, to);
-
         QueryParameter.Builder builder = new QueryParameter.Builder();
         builder.setApplicationName(applicationName);
         builder.setHostName(hostName);
         builder.setMetricName(metricName);
         builder.setFieldName(fieldName);
-        builder.setTagList(tagList);
-        builder.setRange(range);
+        builder.setTagList(tagParser.parseTags(tags));
+        builder.setRange(Range.newRange(from, to));
         QueryParameter queryParameter = builder.build();
 
         TimeWindowSampler sampler = new TimeWindowSampler() {
@@ -101,7 +95,7 @@ public class SystemMetricController {
                 return 10000L;
             }
         };
-        TimeWindow timeWindow = new TimeWindow(range, sampler);
+        TimeWindow timeWindow = new TimeWindow(Range.newRange(from, to), sampler);
 
         return systemMetricService.getSystemMetricChart(timeWindow, queryParameter);
     }
@@ -118,8 +112,6 @@ public class SystemMetricController {
             @RequestParam("to") long to,
             @RequestParam("timeUnit") String timeUnit,
             @RequestParam("timeSize") Integer timeSize) {
-        List<Tag> tagList = tagParser.parseTags(tags);
-        Range range = Range.newRange(from, to);
         TimePrecision timePrecision = TimePrecision.newTimePrecision(TimeUnit.valueOf(timeUnit.toUpperCase()), timeSize);
 
         QueryParameter.Builder builder = new QueryParameter.Builder();
@@ -127,13 +119,13 @@ public class SystemMetricController {
         builder.setHostName(hostName);
         builder.setMetricName(metricName);
         builder.setFieldName(fieldName);
-        builder.setTagList(tagList);
-        builder.setRange(range);
+        builder.setTagList(tagParser.parseTags(tags));
+        builder.setRange(Range.newRange(from, to));
         builder.setTimePrecision(timePrecision);
         QueryParameter queryParameter = builder.build();
 
         final long minSamplingInterval = 10000L;
-        final long inputInterval = timePrecision.getIntervalInMs();
+        final long inputInterval = timePrecision.getInterval();
         final long interval = inputInterval < minSamplingInterval ? minSamplingInterval : inputInterval;
         TimeWindowSampler sampler = new TimeWindowSampler() {
             @Override
@@ -141,7 +133,7 @@ public class SystemMetricController {
                 return interval;
             }
         };
-        TimeWindow timeWindow = new TimeWindow(range, sampler);
+        TimeWindow timeWindow = new TimeWindow(Range.newRange(from, to), sampler);
 
         return systemMetricService.getSystemMetricChart(timeWindow, queryParameter);
     }

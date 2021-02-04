@@ -1,4 +1,4 @@
-package com.navercorp.pinpoint.metric.web.model;
+package com.navercorp.pinpoint.metric.web.util;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +32,7 @@ public final class TimePrecision {
         return timeSize;
     }
 
-    public long getIntervalInMs() {
+    public long getInterval() {
         return timeUnit.toMillis(timeSize);
     }
 

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.navercorp.pinpoint.metric.web.model;
+package com.navercorp.pinpoint.metric.web.util;
 
 
 import com.navercorp.pinpoint.metric.common.model.Tag;
-import com.navercorp.pinpoint.metric.web.util.Range;
 
 import java.util.List;
 import java.util.Objects;
@@ -121,7 +120,7 @@ public class QueryParameter {
         }
 
         public long estimateLimit() {
-            return (range.getRange() / timePrecision.getIntervalInMs() + 1) * TAG_SET_COUNT;
+            return (range.getRange() / timePrecision.getInterval() + 1) * TAG_SET_COUNT;
         }
 
         public QueryParameter build() {
