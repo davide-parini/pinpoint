@@ -15,8 +15,10 @@ public class CollectorApp {
 
     public static void main(String[] args) {
         try {
-            CollectorStarter starter = new CollectorStarter(CollectorApp.class, MetricCollectorApp.class);
-            starter.start(args);
+//            CollectorStarter starter = new CollectorStarter(CollectorApp.class);
+//            starter.start(args);
+            CollectorStarter metricStarter = new CollectorStarter(MetricCollectorApp.class);
+            metricStarter.start(args);
         } catch (Exception exception) {
             logger.error("[CollectorApp] could not launch app.", exception);
         }
